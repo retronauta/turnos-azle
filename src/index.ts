@@ -41,6 +41,13 @@ export default Canister({
   // Datos: datos basicos del paciente
   // Retorna el turno que se genera
   newAppointment: update([text, Data], Appointment, (medEsp, patientData) => {
+    let last = lastAppointment(hospital.keys()); // get last date appointment
+    let today = currentDate(); // get current date
+
+    // console.log(last === tomorrow);
+    console.log({ last, today });
+    // console.log('today is ' + today);
+
     let { name, firstLastName, secondLastName, yearBorn } = patientData;
     let appointment: typeof Appointment = {
       patientCode: setIdPatient(name, firstLastName, secondLastName, yearBorn),
@@ -63,21 +70,11 @@ export default Canister({
     return hospital.keys();
   }),
 
-  // // Retorna todos los turnos
-  // getAppointments: query([nat32], Opt(Appointment), id => {
-  //   return hospital.get(id);
-  // }),
-
   // Retorna un turno segun el id pasado
   getAppointment: query([nat32], Opt(Appointment), id => {
     return hospital.get(id);
   }),
 });
-
-// const checkDate = () => {
-//   const fechaActual = new Date();
-//   return fechaActual;
-// };
 
 // Setea el ID de cada paciente tomando sus iniciales y anio de nacimiento
 const setIdPatient = (
@@ -95,7 +92,8 @@ const setIdPatient = (
 };
 
 const lastAppointment = (item: any) => {
-  console.log(item[item.length - 1]);
+  // console.log(item[item.length - 1]);
+    return item[item.length - 1].toString().slice(1);
 };
 
 let count = 0;
