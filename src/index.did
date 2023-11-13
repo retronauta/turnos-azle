@@ -1,4 +1,4 @@
 service: () -> {
-    getUUID: () -> (text) query;
-    nuevaEspecialidad: (text, record {nombrePaciente:text; turno:int8; idPaciente:text}) -> (opt record {nombrePaciente:text; turno:int8; idPaciente:text});
+    agregarTurno: (text, record {secondLastName:text; yearBorn:text; name:text; firstLastName:text}) -> (record {turno:int8; nombreCompleto:text; especialidad:text; codigoPaciente:text});
+    getPosts: () -> (vec record {turno:int8; nombreCompleto:text; especialidad:text; codigoPaciente:text}) query;
 }
