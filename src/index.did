@@ -1,3 +1,4 @@
 service: () -> {
     getUUID: () -> (text) query;
+    nuevaEspecialidad: (text, record {nombrePaciente:text; turno:int8; idPaciente:text}) -> (opt record {nombrePaciente:text; turno:int8; idPaciente:text});
 }
