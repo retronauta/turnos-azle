@@ -1,5 +1,6 @@
 service: () -> {
-    getPost: (nat32) -> (opt record {turno:int8; nombreCompleto:text; especialidad:text; codigoPaciente:text}) query;
-    getPosts: () -> (vec record {turno:int8; nombreCompleto:text; especialidad:text; codigoPaciente:text}) query;
-    newAppointment: (text, record {secondLastName:text; yearBorn:nat32; name:text; firstLastName:text}) -> (nat32);
+    getPost: (nat32) -> (opt record {appointmentNum:int8; patientCode:text; completeName:text; medEsp:text}) query;
+    getPosts: () -> (vec record {appointmentNum:int8; patientCode:text; completeName:text; medEsp:text}) query;
+    keys: () -> (vec nat32) query;
+    newAppointment: (text, record {secondLastName:text; yearBorn:nat32; name:text; firstLastName:text}) -> (record {appointmentNum:int8; patientCode:text; completeName:text; medEsp:text});
 }

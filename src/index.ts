@@ -18,80 +18,58 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 // Objeto de turno que sera guardado segun la especialidad
-const Turno = Record({
-  turno: int8, // numero del turno que sera incremental hasta que acabe el dia
-  nombreCompleto: text, // nombre compuesto del paciente
-  codigoPaciente: text, // codigo generado a partir de sus iniciales y año de nacimiento
-  especialidad: text, // especialidad a la que esta optando
+const Appointment = Record({
+  appointmentNum: int8, // numero del turno que sera incremental hasta que acabe el dia
+  completeName: text, // nombre compuesto del paciente
+  patientCode: text, // codigo generado a partir de sus iniciales y año de nacimiento
+  medEsp: text, // especialidad a la que esta optando
 });
 
-const Datos = Record({
+// Objeto que interectuara con la UI para recoger datos del paciente
+const Data = Record({
   name: text,
   firstLastName: text,
   secondLastName: text,
   yearBorn: nat32,
 });
 
-let consultorio = StableBTreeMap(nat32, Turno, 0);
+// Estructura para almacenar los turnos
+let hospital = StableBTreeMap(nat32, Appointment, 0);
 
 export default Canister({
-  //TODO debe recibir
-  newAppointment: update(
-    [text, Datos],
-    nat32,
-    (especialidad, datosPaciente) => {
-      let date = new Date();
-      let numberTurno = 1;
-      let idAppointment = Number(
-        `${numberTurno}${date.getDate()}${date.getMonth()}${date
-          .getFullYear()
-          .toString()
-          .slice(2, 4)}`
-      );
-      // let idAppointment = numberTurno`
+  // Creacion de una nueva cita
+  // text: especialidad
+  // Datos: datos basicos del paciente
+  // Retorna el turno que se genera
+  newAppointment: update([text, Data], Appointment, (medEsp, patientData) => {
+    let { name, firstLastName, secondLastName, yearBorn } = patientData;
+    let appointment: typeof Appointment = {
+      patientCode: setIdPatient(name, firstLastName, secondLastName, yearBorn),
+      completeName: `${name} ${firstLastName} ${secondLastName}`,
+      appointmentNum: 34, //TODO
+      medEsp,
+    };
 
-      let { name, firstLastName, secondLastName, yearBorn } = datosPaciente;
-      //TODO verificar fecha para generar turno
-      let turno: typeof Turno = {
-        codigoPaciente: setIdPatient(
-          name,
-          firstLastName,
-          secondLastName,
-          yearBorn
-        ),
-        nombreCompleto: `${name} ${firstLastName} ${secondLastName}`,
-        turno: 34,
-        especialidad,
-      };
-      // let ide = newUUID();
-
-      // console.log('hola');
-      consultorio.insert(idAppointment, turno);
-      return idAppointment;
-    }
-  ),
-
-  getPosts: query([], Vec(Turno), () => {
-    return consultorio.values();
+    hospital.insert(createIdAppointment(), appointment);
+    return appointment;
   }),
 
-  // printReaction: query([testVariant], testVariant, especialidad => {
-  //   // console.log(typeof reaction);
-  //   return especialidad;
-  // }),
+  getPosts: query([], Vec(Appointment), () => {
+    return hospital.values();
+  }),
 
-  getPost: query([nat32], Opt(Turno), id => {
-    return consultorio.get(id);
+  keys: query([], Vec(nat32), () => {
+    lastAppointment(hospital.keys());
+    return hospital.keys();
+  }),
+
+  getPost: query([nat32], Opt(Appointment), id => {
+    return hospital.get(id);
   }),
   //TODO Crear funcion para consultar turnos, quiza con switch
 });
 
-// Generador de UUID para identificar cada StableBtreeMap
-const newUUID = () => {
-  return uuidv4();
-};
-
-const comprobarFecha = () => {
+const checkDate = () => {
   const fechaActual = new Date();
   return fechaActual;
 };
@@ -102,16 +80,28 @@ const setIdPatient = (
   secondLastName: string,
   yearBorn: number
 ): string => {
-  // let date = new Date();
-  // let day = date.getDate().toString();
-  // let month = date.getMonth().toString();
-  // let year = date.getFullYear().toString().slice(2);
-  // console.log(day + month + year);
-  // console.log(fecha.toString().slice())
   return (
     name.slice(0, 1).toUpperCase() +
     firstLastname.slice(0, 1).toUpperCase() +
     secondLastName.slice(0, 1).toUpperCase() +
     yearBorn.toString().slice(2, 4)
   );
+};
+
+const lastAppointment = (item: any) => {
+  console.log(item[item.length - 1]);
+};
+
+let count = 0;
+const createIdAppointment = () => {
+  count += 1;
+  let date = new Date();
+  let idAppointment = Number(
+    `${count}${date.getDate()}${date.getMonth()}${date
+      .getFullYear()
+      .toString()
+      .slice(2, 4)}`
+  );
+
+  return idAppointment;
 };
