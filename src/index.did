@@ -1,4 +1,5 @@
 service: () -> {
-    agregarTurno: (text, record {secondLastName:text; yearBorn:text; name:text; firstLastName:text}) -> (record {turno:int8; nombreCompleto:text; especialidad:text; codigoPaciente:text});
+    getPost: (nat32) -> (opt record {turno:int8; nombreCompleto:text; especialidad:text; codigoPaciente:text}) query;
     getPosts: () -> (vec record {turno:int8; nombreCompleto:text; especialidad:text; codigoPaciente:text}) query;
+    newAppointment: (text, record {secondLastName:text; yearBorn:nat32; name:text; firstLastName:text}) -> (nat32);
 }

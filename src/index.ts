@@ -2,6 +2,8 @@ import {
   CandidType,
   Canister,
   int8,
+  nat32,
+  nat8,
   Null,
   Opt,
   query,
@@ -27,30 +29,27 @@ const Datos = Record({
   name: text,
   firstLastName: text,
   secondLastName: text,
-  yearBorn: text,
+  yearBorn: nat32,
 });
 
-// const especialidades = Variant({
-//   pediatria: text,
-//   cardiologia: text,
-// });
-
-// Esta es una variant que presenta campos a ser llenados
-// const Especialidad = Variant({
-//   nombreEspecialidad: text,
-// });
-// const testVariant = Variant({
-// odontologo: Null,
-// pediatria: Null,
-// });
-
-let consultorio = StableBTreeMap(text, Turno, 0);
+let consultorio = StableBTreeMap(nat32, Turno, 0);
 
 export default Canister({
+  //TODO debe recibir
   newAppointment: update(
     [text, Datos],
-    Turno,
+    nat32,
     (especialidad, datosPaciente) => {
+      let date = new Date();
+      let numberTurno = 1;
+      let idAppointment = Number(
+        `${numberTurno}${date.getDate()}${date.getMonth()}${date
+          .getFullYear()
+          .toString()
+          .slice(2, 4)}`
+      );
+      // let idAppointment = numberTurno`
+
       let { name, firstLastName, secondLastName, yearBorn } = datosPaciente;
       //TODO verificar fecha para generar turno
       let turno: typeof Turno = {
@@ -64,11 +63,11 @@ export default Canister({
         turno: 34,
         especialidad,
       };
-      let ide = newUUID();
+      // let ide = newUUID();
 
       // console.log('hola');
-      consultorio.insert(ide, turno);
-      return turno;
+      consultorio.insert(idAppointment, turno);
+      return idAppointment;
     }
   ),
 
@@ -81,6 +80,9 @@ export default Canister({
   //   return especialidad;
   // }),
 
+  getPost: query([nat32], Opt(Turno), id => {
+    return consultorio.get(id);
+  }),
   //TODO Crear funcion para consultar turnos, quiza con switch
 });
 
@@ -98,7 +100,7 @@ const setIdPatient = (
   name: string,
   firstLastname: string,
   secondLastName: string,
-  yearBorn: string
+  yearBorn: number
 ): string => {
   // let date = new Date();
   // let day = date.getDate().toString();
@@ -110,6 +112,6 @@ const setIdPatient = (
     name.slice(0, 1).toUpperCase() +
     firstLastname.slice(0, 1).toUpperCase() +
     secondLastName.slice(0, 1).toUpperCase() +
-    yearBorn.slice(2, 4)
+    yearBorn.toString().slice(2, 4)
   );
 };
