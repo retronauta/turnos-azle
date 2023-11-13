@@ -15,6 +15,7 @@ import {
   Vec,
   Void,
 } from 'azle';
+import { v4 as uuidv4 } from 'uuid';
 
 // Objeto de turno que sera guardado segun la especialidad
 const Appointment = Record({
@@ -41,6 +42,17 @@ export default Canister({
   // Datos: datos basicos del paciente
   // Retorna el turno que se genera
   newAppointment: update([text, Data], Appointment, (medEsp, patientData) => {
+    // let tomorrow = '141023'; //test data
+    // let last = lastAppointment(hospital.keys()); // get last date appointment
+    // let today = currentDate(); // get current date
+    // console.log(last === tomorrow);
+    // console.log({ last, tomorrow });
+    // console.log('today is ' + today);
+
+    // if (last !== today) {
+    //   count = 0;
+    // }
+
     let { name, firstLastName, secondLastName, yearBorn } = patientData;
     let appointment: typeof Appointment = {
       patientCode: setIdPatient(name, firstLastName, secondLastName, yearBorn),
@@ -53,23 +65,20 @@ export default Canister({
     return appointment;
   }),
 
-  getAppointments: query([], Vec(Appointment), () => {
+  // current: query([], text, () => {
+  //   return currentDate();
+  // }),
+
+  getPosts: query([], Vec(Appointment), () => {
     return hospital.values();
   }),
 
-  // Retorna todos los ids de citas realizadas
-  getIdsAppointments: query([], Vec(nat32), () => {
-    lastAppointment(hospital.keys());
-    return hospital.keys();
-  }),
-
-  // // Retorna todos los turnos
-  // getAppointments: query([nat32], Opt(Appointment), id => {
-  //   return hospital.get(id);
+  // keys: query([], Vec(nat32), () => {
+  //   lastAppointment(hospital.keys());
+  //   return hospital.keys();
   // }),
 
-  // Retorna un turno segun el id pasado
-  getAppointment: query([nat32], Opt(Appointment), id => {
+  getPost: query([nat32], Opt(Appointment), id => {
     return hospital.get(id);
   }),
 });
@@ -79,7 +88,6 @@ export default Canister({
 //   return fechaActual;
 // };
 
-// Setea el ID de cada paciente tomando sus iniciales y anio de nacimiento
 const setIdPatient = (
   name: string,
   firstLastname: string,
@@ -94,9 +102,9 @@ const setIdPatient = (
   );
 };
 
-const lastAppointment = (item: any) => {
-  console.log(item[item.length - 1]);
-};
+// const lastAppointment = (item: any) => {
+//   return item[item.length - 1].toString().slice(1);
+// };
 
 let count = 0;
 const createIdAppointment = () => {
@@ -112,13 +120,12 @@ const createIdAppointment = () => {
   return idAppointment;
 };
 
-// Obtener la fecha actual para comparacion
-const currentDate = (): string => {
-  let date = new Date();
-  let current = `${date.getDate()}${date.getMonth()}${date
-    .getFullYear()
-    .toString()
-    .slice(2, 4)}`;
+// const currentDate = (): string => {
+//   let date = new Date();
+//   let current = `${date.getDate()}${date.getMonth()}${date
+//     .getFullYear()
+//     .toString()
+//     .slice(2, 4)}`;
 
-  return current;
-};
+//   return current;
+// };
